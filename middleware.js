@@ -14,7 +14,7 @@ let checkToken = (req, res, next) => {
       message: "Auth token is not supplied"
     });
   }
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
     if (err) {
       return res.status(401).json({
         success: false,

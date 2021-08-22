@@ -6,9 +6,9 @@ const { asyncMiddleware } = require('../../middleware');
 const authController = {
     register: asyncMiddleware(async (req, res, next) => {
 
-        const { name, email, password } = req.body;
+        const { name, email, password, passwordValidation } = req.body;
 
-        if (!name || !email || !password) return next({
+        if (!name || !email || !password || !passwordValidation) return next({
             status: 403,
             message: `Please fill in the required information.`
         });
@@ -31,11 +31,19 @@ const authController = {
             message: `This email (${email}) already exists`
         });
 
+        if (password !== passwordValidation) {
+            return next({
+                status: 400,
+                message: "Passwords must be equal."
+            });
+        }
+
         if (password.length < 6)
             return next({
                 status: 400,
                 message: "Password too short. Minimum 6 characters."
             });
+
 
         // Password Encryption
         const salt = await bcrypt.genSalt(10);
@@ -54,7 +62,7 @@ const authController = {
 
         res.cookie('refreshtoken', refreshtoken, {
             httpOnly: true,
-            path: '/user/refresh_token',
+            path: 'api/auth/refresh_token',
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7d
         });
 
